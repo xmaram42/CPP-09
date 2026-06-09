@@ -1,0 +1,91 @@
+main()
+ |
+ | creates object
+ v
+BitcoinExchange btc;
+ |
+ | loads database
+ v
+btc.loadDatabase("data.csv");
+ |
+ | reads input file
+ v
+btc.takeFile("input.txt");
+ |
+ | inside takeFile:
+ | - split line
+ | - call isValidDate()
+ | - call isLeapYear()
+ | - convert value
+ | - check negative
+ | - check too large
+
+ isValidDate(date)
+
+Goal:
+Check if a date string is a real valid date in format YYYY-MM-DD.
+
+Steps:
+1. Check length is exactly 10.
+2. Check date[4] and date[7] are '-'.
+3. Check all other characters are digits.
+4. Extract year, month, day using substr.
+5. Convert them to int using atoi.
+6. Check month is 1 to 12.
+7. Check day is at least 1.
+8. Decide maxDays:
+   - February:
+     leap year -> 29
+     not leap year -> 28
+   - April, June, September, November -> 30
+   - all other months -> 31
+9. If day > maxDays, date is invalid.
+10. Otherwise, date is valid.
+
+isLeapYear(year)
+
+Leap year rules:
+1. If year % 400 == 0 -> true
+2. Else if year % 100 == 0 -> false
+3. Else if year % 4 == 0 -> true
+4. Else -> false
+
+Examples:
+2000 -> leap year
+1900 -> not leap year
+2020 -> leap year
+2021 -> not leap year
+
+
+
+date = "2011-01-09"
+
+lower_bound("2011-01-09")
+        ↓
+points to 2011-01-10
+
+Is it exact?
+2011-01-10 == 2011-01-09
+No
+
+Is it begin?
+No
+
+Move one step back:
+--iter
+
+Now points to:
+2011-01-08
+
+Return:
+0.32
+
+
+//Qusition -> 
+-1 “The person being evaluated must explain why
+ they chose to use this container and not another.?
+ 
+
+2-I used std::map as my STL container. The key is the 
+date as a std::string, and the value is the bitcoin
+ exchange rate as a double.
