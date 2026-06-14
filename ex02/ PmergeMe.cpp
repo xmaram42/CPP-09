@@ -24,46 +24,6 @@ PmergeMe::~PmergeMe()
 {
 }
 
-void PmergeMe::run(int ac, char **av)
-{
-    std::vector<int> sortedVector;
-    std::deque<int> sortedDeque;
-
-    clock_t startVector;
-    clock_t endVector;
-    clock_t startDeque;
-    clock_t endDeque;
-
-    double vectorTime;
-    double dequeTime;
-
-    if (!parseInput(ac, av))
-        throw std::runtime_error("Error");
-
-    printBefore();
-
-    startVector = clock();
-    sortedVector = sortVector(_vector);
-    endVector = clock();
-
-    startDeque = clock();
-    sortedDeque = sortDeque(_deque);
-    endDeque = clock();
-
-    vectorTime = static_cast<double>(endVector - startVector) / CLOCKS_PER_SEC * 1000000;
-    dequeTime = static_cast<double>(endDeque - startDeque) / CLOCKS_PER_SEC * 1000000;
-
-    printAfter(sortedVector);
-
-    std::cout << "Time to process a range of " << _vector.size()
-              << " elements with std::vector : "
-              << vectorTime << " us" << std::endl;
-
-    std::cout << "Time to process a range of " << _deque.size()
-              << " elements with std::deque : "
-              << dequeTime << " us" << std::endl;
-}
-
 bool PmergeMe::parseInput(int ac, char **av)
 {
     if (ac < 2)
@@ -103,6 +63,50 @@ bool PmergeMe::parseInput(int ac, char **av)
     }
     return true;
 }
+
+void PmergeMe::run(int ac, char **av)
+{
+    std::vector<int> sortedVector;
+    std::deque<int> sortedDeque;
+
+    clock_t startVector;
+    clock_t endVector;
+    clock_t startDeque;
+    clock_t endDeque;
+
+    double vectorTime;
+    double dequeTime;
+
+    if (!parseInput(ac, av))
+        throw std::runtime_error("Error");
+
+    printBefore();
+
+    startVector = clock();
+    sortedVector = sortVector(_vector);
+    endVector = clock();
+
+    startDeque = clock();
+    sortedDeque = sortDeque(_deque);
+    endDeque = clock();
+
+    if (sortedDeque.size() != sortedVector.size())
+        throw std::runtime_error("Error");
+
+    vectorTime = static_cast<double>(endVector - startVector) / CLOCKS_PER_SEC * 1000000;
+    dequeTime = static_cast<double>(endDeque - startDeque) / CLOCKS_PER_SEC * 1000000;
+
+    printAfter(sortedVector);
+
+    std::cout << "Time to process a range of " << _vector.size()
+              << " elements with std::vector : "
+              << vectorTime << " us" << std::endl;
+
+    std::cout << "Time to process a range of " << _deque.size()
+              << " elements with std::deque : "
+              << dequeTime << " us" << std::endl;
+}
+
 
 void PmergeMe::printBefore() const
 {
@@ -169,7 +173,6 @@ std::vector<int> PmergeMe::sortVector(std::vector<int> input)
     }
 
     chain = sortVector(chain);
-
     std::vector<size_t> order = getJacobsthalOrderVector(pending.size());
     i = 0;
     while (i < order.size())
@@ -180,7 +183,6 @@ std::vector<int> PmergeMe::sortVector(std::vector<int> input)
 
     if (hasLeftover)
         insertSortedVector(chain, leftover);
-
     return chain;
 }
 

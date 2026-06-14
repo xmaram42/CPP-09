@@ -9,6 +9,7 @@
 #include <cctype>
 #include <climits>
 #include <stdexcept>
+#include <ctime>
 
 class PmergeMe
 {
@@ -21,13 +22,14 @@ private:
     void printAfter(const std::vector<int>& sorted) const;
 
     std::vector<int> sortVector(std::vector<int> input);
-    void insertSortedVector(std::vector<int>& chain, int value);
-
     std::deque<int> sortDeque(std::deque<int> input);
+
+    void insertSortedVector(std::vector<int>& chain, int value);
     void insertSortedDeque(std::deque<int>& chain, int value);
 
-    std::deque<size_t> getJacobsthalOrderDeque(size_t size) const
-    std::deque<size_t> getJacobsthalOrderVector(size_t size) const
+    std::vector<size_t> getJacobsthalOrderVector(size_t size) const;
+    std::deque<size_t> getJacobsthalOrderDeque(size_t size) const;
+
 public:
     PmergeMe();
     PmergeMe(const PmergeMe &other);
