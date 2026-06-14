@@ -1,12 +1,12 @@
 #include "PmergeMe.hpp"
-#include <iostream>
+
 
 int main(int ac, char **av)
 {
     try
     {
-        PmergeMe test;
-        test.run(ac, av);
+        PmergeMe pmerge;
+        pmerge.run(ac, av);
     }
     catch (const std::exception& e)
     {

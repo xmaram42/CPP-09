@@ -26,39 +26,62 @@ PmergeMe::~PmergeMe()
 
 void PmergeMe::run(int ac, char **av)
 {
+    std::vector<int> sortedVector;
+    std::deque<int> sortedDeque;
+
+    clock_t startVector;
+    clock_t endVector;
+    clock_t startDeque;
+    clock_t endDeque;
+
+    double vectorTime;
+    double dequeTime;
+
     if (!parseInput(ac, av))
         throw std::runtime_error("Error");
 
     printBefore();
-}
 
-void PmergeMe::printBefore() const
-{
-    std::cout << "Before:";
+    startVector = clock();
+    sortedVector = sortVector(_vector);
+    endVector = clock();
 
-    for (size_t i = 0; i < _vector.size(); i++)
-        std::cout << " " << _vector[i];
+    startDeque = clock();
+    sortedDeque = sortDeque(_deque);
+    endDeque = clock();
 
-    std::cout << std::endl;
+    vectorTime = static_cast<double>(endVector - startVector) / CLOCKS_PER_SEC * 1000000;
+    dequeTime = static_cast<double>(endDeque - startDeque) / CLOCKS_PER_SEC * 1000000;
+
+    printAfter(sortedVector);
+
+    std::cout << "Time to process a range of " << _vector.size()
+              << " elements with std::vector : "
+              << vectorTime << " us" << std::endl;
+
+    std::cout << "Time to process a range of " << _deque.size()
+              << " elements with std::deque : "
+              << dequeTime << " us" << std::endl;
 }
 
 bool PmergeMe::parseInput(int ac, char **av)
 {
-    if(ac < 2)
-        return(false);
+    if (ac < 2)
+        return false;
 
     int i = 1;
-    while(i < ac)
+    while (i < ac)
     {
         std::string str = av[i];
-        if (str.empty())
-            return (false);
 
-        size_t  j = 0;
-        while(j < str.length())
+        if (str.empty())
+            return false;
+
+        size_t j = 0;
+        while (j < str.length())
         {
-            if(!std::isdigit(str[j]))
-                return(false);
+            if (!std::isdigit(str[j]))
+                return false;
             j++;
         }
 
@@ -78,6 +101,239 @@ bool PmergeMe::parseInput(int ac, char **av)
 
         i++;
     }
-    return(true);
+    return true;
 }
 
+void PmergeMe::printBefore() const
+{
+    std::cout << "Before:";
+
+    size_t i = 0;
+    while (i < _vector.size())
+    {
+        std::cout << " " << _vector[i];
+        i++;
+    }
+
+    std::cout << std::endl;
+}
+
+void PmergeMe::printAfter(const std::vector<int>& sorted) const
+{
+    std::cout << "After:";
+
+    size_t i = 0;
+    while (i < sorted.size())
+    {
+        std::cout << " " << sorted[i];
+        i++;
+    }
+
+    std::cout << std::endl;
+}
+
+std::vector<int> PmergeMe::sortVector(std::vector<int> input)
+{
+    if (input.size() <= 1)
+        return input;
+
+    std::vector<int> chain;
+    std::vector<int> pending;
+    int leftover = 0;
+    bool hasLeftover = false;
+    size_t i = 0;
+
+    while (i + 1 < input.size())
+    {
+        int first = input[i];
+        int second = input[i + 1];
+
+        if (first > second)
+        {
+            chain.push_back(first);
+            pending.push_back(second);
+        }
+        else
+        {
+            chain.push_back(second);
+            pending.push_back(first);
+        }
+
+        i = i + 2;
+    }
+
+    if (i < input.size())
+    {
+        leftover = input[i];
+        hasLeftover = true;
+    }
+
+    chain = sortVector(chain);
+
+    std::vector<size_t> order = getJacobsthalOrderVector(pending.size());
+    i = 0;
+    while (i < order.size())
+    {
+        insertSortedVector(chain, pending[order[i]]);
+        i++;
+    }
+
+    if (hasLeftover)
+        insertSortedVector(chain, leftover);
+
+    return chain;
+}
+
+void PmergeMe::insertSortedVector(std::vector<int>& chain, int value)
+{
+    size_t i = 0;
+
+    while (i < chain.size() && chain[i] < value)
+        i++;
+
+    chain.insert(chain.begin() + i, value);
+}
+
+std::deque<int> PmergeMe::sortDeque(std::deque<int> input)
+{
+    if (input.size() <= 1)
+        return input;
+
+    std::deque<int> chain;
+    std::deque<int> pending;
+    int leftover = 0;
+    bool hasLeftover = false;
+    size_t i = 0;
+
+    while (i + 1 < input.size())
+    {
+        int first = input[i];
+        int second = input[i + 1];
+
+        if (first > second)
+        {
+            chain.push_back(first);
+            pending.push_back(second);
+        }
+        else
+        {
+            chain.push_back(second);
+            pending.push_back(first);
+        }
+
+        i = i + 2;
+    }
+
+    if (i < input.size())
+    {
+        leftover = input[i];
+        hasLeftover = true;
+    }
+
+    chain = sortDeque(chain);
+
+    std::deque<size_t> order = getJacobsthalOrderDeque(pending.size());
+    i = 0;
+    while (i < order.size())
+    {
+        insertSortedDeque(chain, pending[order[i]]);
+        i++;
+    }
+
+    if (hasLeftover)
+        insertSortedDeque(chain, leftover);
+
+    return chain;
+}
+
+void PmergeMe::insertSortedDeque(std::deque<int>& chain, int value)
+{
+    size_t i = 0;
+
+    while (i < chain.size() && chain[i] < value)
+        i++;
+
+    chain.insert(chain.begin() + i, value);
+}
+
+std::vector<size_t> PmergeMe::getJacobsthalOrderVector(size_t size) const
+{
+    std::vector<size_t> order;
+    size_t prev;
+    size_t curr;
+    size_t next;
+    size_t start;
+    size_t end;
+
+    if (size == 0)
+        return order;
+
+    order.push_back(0);
+
+    prev = 1;
+    curr = 3;
+
+    while (order.size() < size)
+    {
+        start = prev + 1;
+        end = curr;
+
+        if (end > size)
+            end = size;
+
+        while (start <= end)
+        {
+            order.push_back(end - 1);
+            if (end == start)
+                break;
+            end--;
+        }
+
+        next = curr + (2 * prev);
+        prev = curr;
+        curr = next;
+    }
+
+    return order;
+}
+
+std::deque<size_t> PmergeMe::getJacobsthalOrderDeque(size_t size) const
+{
+    std::deque<size_t> order;
+    size_t prev;
+    size_t curr;
+    size_t next;
+    size_t start;
+    size_t end;
+
+    if (size == 0)
+        return order;
+
+    order.push_back(0);
+
+    prev = 1;
+    curr = 3;
+
+    while (order.size() < size)
+    {
+        start = prev + 1;
+        end = curr;
+
+        if (end > size)
+            end = size;
+
+        while (start <= end)
+        {
+            order.push_back(end - 1);
+            if (end == start)
+                break;
+            end--;
+        }
+
+        next = curr + (2 * prev);
+        prev = curr;
+        curr = next;
+    }
+
+    return order;
+}
