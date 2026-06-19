@@ -20,8 +20,8 @@ RPN::~RPN()
 
 void RPN::calculate(const std::string& math)
 {
-    std::stringstream ss(math);   //ss will help us read the math string word by word.
-    std::string token; // token will store each piece.
+    std::stringstream ss(math);
+    std::string token;
 
      while (ss >> token)
     {

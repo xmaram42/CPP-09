@@ -1,5 +1,4 @@
 #include "BitcoinExchange.hpp"
-#include <iostream>
 
 int main(int argc, char **argv)
 {
@@ -8,11 +7,8 @@ int main(int argc, char **argv)
         std::cerr << "Error: could not open file." << std::endl;
         return 1;
     }
-
     BitcoinExchange btc;
-
     btc.loadDatabase("data.csv");
     btc.takeFile(argv[1]);
-
     return 0;
 }

@@ -18,8 +18,6 @@ private:
     bool isValidDate(const std::string& date) const;
     bool isLeapYear(int year) const;
     double searchDataSet(const std::string& date) const;
-
-
     
 public:
     BitcoinExchange();

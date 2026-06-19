@@ -28,12 +28,10 @@ bool PmergeMe::parseInput(int ac, char **av)
 {
     if (ac < 2)
         return false;
-
     int i = 1;
     while (i < ac)
     {
         std::string str = av[i];
-
         if (str.empty())
             return false;
 
@@ -44,21 +42,16 @@ bool PmergeMe::parseInput(int ac, char **av)
                 return false;
             j++;
         }
-
         std::stringstream ss(str);
         long number;
 
         ss >> number;
-
         if (ss.fail())
             return false;
-
         if (number <= 0 || number > INT_MAX)
             return false;
-
         _vector.push_back(static_cast<int>(number));
         _deque.push_back(static_cast<int>(number));
-
         i++;
     }
     return true;
@@ -79,9 +72,7 @@ void PmergeMe::run(int ac, char **av)
 
     if (!parseInput(ac, av))
         throw std::runtime_error("Error");
-
     printBefore();
-
     startVector = clock();
     sortedVector = sortVector(_vector);
     endVector = clock();
@@ -91,7 +82,15 @@ void PmergeMe::run(int ac, char **av)
     endDeque = clock();
 
     if (sortedDeque.size() != sortedVector.size())
-        throw std::runtime_error("Error");
+    throw std::runtime_error("Error");
+
+    size_t k = 0;
+    while (k < sortedVector.size())
+    {
+        if (sortedVector[k] != sortedDeque[k])
+            throw std::runtime_error("Error");
+        k++;
+    }
 
     vectorTime = static_cast<double>(endVector - startVector) / CLOCKS_PER_SEC * 1000000;
     dequeTime = static_cast<double>(endDeque - startDeque) / CLOCKS_PER_SEC * 1000000;
@@ -118,7 +117,6 @@ void PmergeMe::printBefore() const
         std::cout << " " << _vector[i];
         i++;
     }
-
     std::cout << std::endl;
 }
 
@@ -135,7 +133,6 @@ void PmergeMe::printAfter(const std::vector<int>& sorted) const
 
     std::cout << std::endl;
 }
-
 std::vector<int> PmergeMe::sortVector(std::vector<int> input)
 {
     if (input.size() <= 1)
@@ -162,16 +159,13 @@ std::vector<int> PmergeMe::sortVector(std::vector<int> input)
             chain.push_back(second);
             pending.push_back(first);
         }
-
         i = i + 2;
     }
-
     if (i < input.size())
     {
         leftover = input[i];
         hasLeftover = true;
     }
-
     chain = sortVector(chain);
     std::vector<size_t> order = getJacobsthalOrderVector(pending.size());
     i = 0;
@@ -180,22 +174,27 @@ std::vector<int> PmergeMe::sortVector(std::vector<int> input)
         insertSortedVector(chain, pending[order[i]]);
         i++;
     }
-
     if (hasLeftover)
         insertSortedVector(chain, leftover);
     return chain;
 }
-
 void PmergeMe::insertSortedVector(std::vector<int>& chain, int value)
 {
-    size_t i = 0;
+    size_t left = 0;
+    size_t right = chain.size();
 
-    while (i < chain.size() && chain[i] < value)
-        i++;
+    while (left < right)
+    {
+        size_t mid = left + (right - left) / 2;
 
-    chain.insert(chain.begin() + i, value);
+        if (chain[mid] < value)
+            left = mid + 1;
+        else
+            right = mid;
+    }
+
+    chain.insert(chain.begin() + left, value);
 }
-
 std::deque<int> PmergeMe::sortDeque(std::deque<int> input)
 {
     if (input.size() <= 1)
@@ -222,18 +221,14 @@ std::deque<int> PmergeMe::sortDeque(std::deque<int> input)
             chain.push_back(second);
             pending.push_back(first);
         }
-
         i = i + 2;
     }
-
     if (i < input.size())
     {
         leftover = input[i];
         hasLeftover = true;
     }
-
     chain = sortDeque(chain);
-
     std::deque<size_t> order = getJacobsthalOrderDeque(pending.size());
     i = 0;
     while (i < order.size())
@@ -241,21 +236,26 @@ std::deque<int> PmergeMe::sortDeque(std::deque<int> input)
         insertSortedDeque(chain, pending[order[i]]);
         i++;
     }
-
     if (hasLeftover)
         insertSortedDeque(chain, leftover);
-
     return chain;
 }
 
 void PmergeMe::insertSortedDeque(std::deque<int>& chain, int value)
 {
-    size_t i = 0;
+    size_t left = 0;
+    size_t right = chain.size();
 
-    while (i < chain.size() && chain[i] < value)
-        i++;
+    while (left < right)
+    {
+        size_t mid = left + (right - left) / 2;
 
-    chain.insert(chain.begin() + i, value);
+        if (chain[mid] < value)
+            left = mid + 1;
+        else
+            right = mid;
+    }
+    chain.insert(chain.begin() + left, value);
 }
 
 std::vector<size_t> PmergeMe::getJacobsthalOrderVector(size_t size) const
@@ -269,12 +269,10 @@ std::vector<size_t> PmergeMe::getJacobsthalOrderVector(size_t size) const
 
     if (size == 0)
         return order;
-
     order.push_back(0);
 
     prev = 1;
     curr = 3;
-
     while (order.size() < size)
     {
         start = prev + 1;
@@ -282,7 +280,6 @@ std::vector<size_t> PmergeMe::getJacobsthalOrderVector(size_t size) const
 
         if (end > size)
             end = size;
-
         while (start <= end)
         {
             order.push_back(end - 1);
@@ -290,12 +287,10 @@ std::vector<size_t> PmergeMe::getJacobsthalOrderVector(size_t size) const
                 break;
             end--;
         }
-
         next = curr + (2 * prev);
         prev = curr;
         curr = next;
     }
-
     return order;
 }
 
@@ -310,20 +305,15 @@ std::deque<size_t> PmergeMe::getJacobsthalOrderDeque(size_t size) const
 
     if (size == 0)
         return order;
-
     order.push_back(0);
-
     prev = 1;
     curr = 3;
-
     while (order.size() < size)
     {
         start = prev + 1;
         end = curr;
-
         if (end > size)
             end = size;
-
         while (start <= end)
         {
             order.push_back(end - 1);
@@ -331,11 +321,9 @@ std::deque<size_t> PmergeMe::getJacobsthalOrderDeque(size_t size) const
                 break;
             end--;
         }
-
         next = curr + (2 * prev);
         prev = curr;
         curr = next;
     }
-
     return order;
 }
